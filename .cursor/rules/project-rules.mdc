@@ -1,3 +1,8 @@
+---
+alwaysApply: true
+---
+_最終更新: 2025 年 7 月 9 日_
+
 # Driver Logbook v3 - プロジェクトルール
 
 ## 📋 プロジェクト概要
@@ -397,4 +402,4 @@ export async function getDailyReports(
 
 ---
 
-_最終更新: 2024 年 12 月_
+_最終更新: 2025 年 7 月 9 日_
