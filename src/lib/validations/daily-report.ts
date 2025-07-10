@@ -42,7 +42,10 @@ export const dailyReportSchema = z
       .min(0, '配送件数は0以上で入力してください')
       .max(999, '配送件数は999以下で入力してください')
       .optional(),
-    toll_fee: z.number().min(0, '高速料金は0以上で入力してください').optional(),
+    highway_fee: z
+      .number()
+      .min(0, '高速料金は0以上で入力してください')
+      .optional(),
     notes: z
       .string()
       .max(500, '備考は500文字以下で入力してください')
@@ -115,7 +118,7 @@ export type CreateDailyReportData = {
   start_odometer?: number;
   end_odometer?: number;
   deliveries?: number;
-  toll_fee?: number;
+  highway_fee?: number;
   notes?: string;
 };
 
