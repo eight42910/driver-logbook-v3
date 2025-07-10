@@ -28,11 +28,24 @@ export interface DailyReport {
   start_odometer?: number; // 開始時のオドメーター（オプション）
   end_odometer?: number; // 終了時のオドメーター（オプション）
   distance_km?: number; // 自動計算される距離（km）
-  deliveries: number; // 配送件数
-  highway_fee: number; // 高速代
+  deliveries?: number; // 配送件数
+  toll_fee?: number; // 高速料金
   notes?: string; // メモ（オプション）
   created_at: string; // 作成日時
   updated_at: string; // 更新日時
+}
+
+// DailyReportフォーム用の型定義
+export interface DailyReportForm {
+  date: string; // 日付（YYYY-MM-DD形式）
+  is_worked: boolean; // 稼働したかどうか
+  start_time?: string; // 開始時間（HH:MM形式、オプション）
+  end_time?: string; // 終了時間（HH:MM形式、オプション）
+  start_odometer?: number; // 開始メーター（オプション）
+  end_odometer?: number; // 終了メーター（オプション）
+  deliveries?: number; // 配送件数（オプション）
+  toll_fee?: number; // 高速料金（オプション）
+  notes?: string; // 備考（オプション）
 }
 
 // MonthlyReportインターフェースの定義
@@ -43,7 +56,7 @@ export interface MonthlyReport {
   working_days: number; // 労働日数
   total_distance: number; // 合計距離
   total_deliveries: number; // 合計配送件数
-  total_highway_fee: number; // 合計高速代
+  total_toll_fee: number; // 合計高速料金
   total_hours: number; // 合計労働時間（numeric型）
   updated_at: string; // 更新日時
 }
