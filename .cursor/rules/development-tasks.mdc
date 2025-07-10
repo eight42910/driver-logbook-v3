@@ -1,6 +1,3 @@
----
-alwaysApply: false
----
 # 開発タスク管理 - Driver Logbook v3
 
 ## 🚀 開発フェーズとタスク
@@ -167,5 +164,52 @@ alwaysApply: false
 
 ---
 
+_最終更新: 2025 年 7 月 9 日_
+_次回レビュー: 2025 年 7 月 10 日_
+
+## 🔧 **PR 作成・マージの具体的なタイミング**
+
+### 📅 フェーズ 2 の PR スケジュール
+
+```mermaid
+gantt
+    title フェーズ2 PR・マージスケジュール
+    dateFormat  YYYY-MM-DD
+    section Story 6
+    フォーム実装           :a1, 2024-01-15, 3d
+    バリデーション         :a2, after a1, 2d
+    PR作成・マージ        :milestone, m1, after a2, 1d
+
+    section Story 7
+    一覧表示              :b1, after m1, 2d
+    カレンダービュー        :b2, after b1, 2d
+    PR作成・マージ        :milestone, m2, after b2, 1d
+
+    section Story 8
+    編集・削除機能         :c1, after m2, 2d
+    PR作成・マージ        :milestone, m3, after c1, 1d
+
+    section フェーズ2完了
+    統合テスト            :d1, after m3, 1d
+    ベータ版デプロイ       :milestone, m4, after d1, 1d
+```
+
+### 🎯 **PR 作成基準**
+
+| **PR 種類** | **作成タイミング**  | **マージ条件**            | **例**            |
+| ----------- | ------------------- | ------------------------- | ----------------- |
+| **機能 PR** | 1 つの Story 完了時 | 動作確認 + コードレビュー | Story 6 完了時    |
+| **修正 PR** | バグ修正・改善時    | テスト通過 + 確認         | UI バグ修正時     |
+| **統合 PR** | Phase 完了時        | 統合テスト + デプロイ確認 | フェーズ 2 完了時 |
+
+### 📝 **PR 作成時のチェックリスト**
+
+```markdown
+<code_block_to_apply_changes_from>
+```
+
+## 🚀 **Story 6 実装開始：日報作成機能**
+
+今すぐ始められるように、必要なファイル構造を準備しましょう：
 _最終更新: 2025 年 7 月 9 日_
 _次回レビュー: 2025 年 7 月 10 日_
