@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ユーザープロフィールを取得する関数
   const fetchUserProfile = async (userId: string) => {
+    console.log('📡 プロフィール取得開始:', userId);
     try {
       const { data, error } = await supabase
         .from('users')
@@ -29,14 +30,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
+      console.log('📡 プロフィール取得レスポンス:', { data, error });
+
       if (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('❌ プロフィール取得エラー:', error);
+        // プロフィールが存在しない場合は基本的なプロフィールを返す
+        if (error.code === 'PGRST116') {
+          console.log('⚠️ プロフィール未存在、基本プロフィールを作成');
+          // レコードが見つからない場合
+          return {
+            id: userId,
+            email: '',
+            display_name: null,
+            company_name: null,
+            vehicle_info: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+        }
         return null;
       }
 
+      console.log('✅ プロフィール取得成功:', data);
       return data;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('❌ プロフィール取得例外:', error);
       return null;
     }
   };
@@ -97,17 +115,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth状態変更:', event, session?.user?.id);
+      
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        console.log('✅ ログイン検出:', session?.user?.id);
         setUser(session?.user ?? null);
         if (session?.user) {
+          console.log('📡 プロフィール取得開始...');
           const profile = await fetchUserProfile(session.user.id);
+          console.log('📡 プロフィール取得完了:', profile);
           setUserProfile(profile);
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log('👋 ログアウト検出');
         setUser(null);
         setUserProfile(null);
       }
       setLoading(false);
+      console.log('🔄 Auth loading完了');
     });
 
     return () => subscription.unsubscribe();

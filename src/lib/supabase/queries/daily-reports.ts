@@ -231,7 +231,7 @@ export async function getMonthlyStats(
       (sum, r) => sum + (r.deliveries || 0),
       0
     ),
-    totalTollFee: workingReports.reduce((sum, r) => sum + (r.toll_fee || 0), 0),
+    totalTollFee: workingReports.reduce((sum, r) => sum + (r.highway_fee || 0), 0),
     totalHours: 0, // TODO: 時間計算を実装
   };
 
@@ -285,7 +285,7 @@ export async function upsertDailyReport(
     start_odometer: formData.start_odometer,
     end_odometer: formData.end_odometer,
     deliveries: formData.deliveries,
-    toll_fee: formData.toll_fee,
+          highway_fee: formData.highway_fee,
     notes: formData.notes,
   };
 

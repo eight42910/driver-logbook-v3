@@ -40,25 +40,35 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginForm) => {
+    console.log('🔄 ログイン開始:', data.email);
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log('📡 Supabase認証リクエスト送信...');
       const { data: authData, error: authError } =
         await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
 
+      console.log('📡 Supabase認証レスポンス:', { authData, authError });
+
       if (authError) {
+        console.error('❌ 認証エラー:', authError);
         throw authError;
       }
 
       if (authData.user) {
-        // ログイン成功時はダッシュボードへリダイレクト
-        router.push('/dashboard');
+        console.log('✅ ログイン成功:', authData.user.id);
+        console.log('🔄 ダッシュボードにリダイレクト中...');
+
+        // 強制的にリダイレクト
+        window.location.href = '/dashboard';
+        return;
       }
     } catch (error: any) {
+      console.error('❌ ログインエラー:', error);
       setError(error.message || 'ログインに失敗しました');
     } finally {
       setIsLoading(false);
