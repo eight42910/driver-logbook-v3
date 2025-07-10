@@ -3,40 +3,29 @@
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
-import { cn } from '@/lib/utils';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  user?: {
-    name?: string;
-    email?: string;
-    avatar?: string;
-  };
-  className?: string;
 }
 
 /**
- * アプリケーションのメインレイアウトコンポーネント
- * 認証後のページで使用される統一レイアウト
+ * メインレイアウトコンポーネント
+ * 認証後のページで使用される統合レイアウト
  */
-export function MainLayout({ children, user, className }: MainLayoutProps) {
+export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
-      {/* ヘッダー */}
-      <Header user={user} />
+    <div className="min-h-screen flex flex-col">
+      <Header />
 
-      <div className="flex">
-        {/* サイドバー（デスクトップ） */}
-        <aside className="hidden w-64 md:block border-r bg-gray-50/40 dark:bg-gray-950/40">
-          <Sidebar />
-        </aside>
+      <div className="flex-1 flex">
+        <Sidebar />
 
-        {/* メインコンテンツエリア */}
-        <main className={cn('flex-1 flex flex-col', className)}>
-          <div className="flex-1 container py-6">{children}</div>
-          <Footer />
+        <main className="flex-1 p-6 bg-gray-50">
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }

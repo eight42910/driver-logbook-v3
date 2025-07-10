@@ -3,95 +3,115 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 import {
-  LayoutDashboard,
-  FileText,
-  Wrench,
-  Receipt,
-  Settings,
-  Truck,
+  HomeIcon,
+  BookOpenIcon,
+  BarChart3Icon,
+  SettingsIcon,
+  UserIcon,
 } from 'lucide-react';
 
-interface SidebarProps {
-  className?: string;
-}
+const sidebarItems = [
+  {
+    href: '/dashboard',
+    label: 'ダッシュボード',
+    icon: HomeIcon,
+  },
+  {
+    href: '/daily-reports',
+    label: '日報管理',
+    icon: BookOpenIcon,
+  },
+  {
+    href: '/monthly-reports',
+    label: '月次レポート',
+    icon: BarChart3Icon,
+  },
+  {
+    href: '/profile',
+    label: 'プロフィール',
+    icon: UserIcon,
+  },
+  {
+    href: '/settings',
+    label: '設定',
+    icon: SettingsIcon,
+  },
+];
 
 /**
- * メインナビゲーション用サイドバーコンポーネント
- * アクティブページのハイライト機能付き
+ * サイドバーコンポーネント
+ * デスクトップ表示時のメインナビゲーション
  */
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname();
-
-  const routes = [
-    {
-      label: 'ダッシュボード',
-      icon: LayoutDashboard,
-      href: '/dashboard',
-      color: 'text-sky-500',
-    },
-    {
-      label: '日報管理',
-      icon: FileText,
-      href: '/reports',
-      color: 'text-violet-500',
-    },
-    {
-      label: 'メンテナンス',
-      icon: Wrench,
-      href: '/maintenance',
-      color: 'text-pink-700',
-    },
-    {
-      label: '経費管理',
-      icon: Receipt,
-      href: '/expenses',
-      color: 'text-orange-700',
-    },
-    {
-      label: '設定',
-      icon: Settings,
-      href: '/settings',
-      color: 'text-gray-700',
-    },
-  ];
+  const { userProfile } = useAuth();
 
   return (
-    <div className={cn('pb-12 min-h-screen', className)}>
-      <div className="space-y-4 py-4">
-        {/* ロゴ */}
-        <div className="px-3 py-2">
-          <Link href="/" className="flex items-center pl-3 mb-14">
-            <div className="relative h-8 w-8 mr-4">
-              <Truck className="h-8 w-8 text-blue-600" />
+    <aside className="hidden w-64 md:flex flex-col bg-white border-r border-gray-200">
+      <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+        {/* ユーザー情報 */}
+        <div className="flex items-center flex-shrink-0 px-4 mb-6">
+          <div className="flex-shrink-0">
+            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <span className="text-sm font-medium text-blue-700">
+                {userProfile?.display_name?.charAt(0) || 'U'}
+              </span>
             </div>
-            <h1 className="text-2xl font-bold">Driver Logbook</h1>
-          </Link>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm font-medium text-gray-900">
+              {userProfile?.display_name || 'ユーザー'}
+            </p>
+            {userProfile?.company_name && (
+              <p className="text-xs text-gray-500">
+                {userProfile.company_name}
+              </p>
+            )}
+          </div>
+        </div>
 
-          {/* ナビゲーションメニュー */}
-          <div className="space-y-1">
-            {routes.map((route) => (
+        {/* ナビゲーション */}
+        <nav className="flex-1 px-2 space-y-1">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+
+            return (
               <Link
-                key={route.href}
-                href={route.href}
+                key={item.href}
+                href={item.href}
                 className={cn(
-                  'text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition',
-                  pathname === route.href
-                    ? 'text-white bg-white/10'
-                    : 'text-zinc-400'
+                  'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
+                  isActive
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 )}
               >
-                <div className="flex items-center flex-1">
-                  <route.icon className={cn('h-5 w-5 mr-3', route.color)} />
-                  {route.label}
-                </div>
+                <Icon
+                  className={cn(
+                    'mr-3 h-5 w-5 flex-shrink-0',
+                    isActive
+                      ? 'text-blue-500'
+                      : 'text-gray-400 group-hover:text-gray-500'
+                  )}
+                />
+                {item.label}
               </Link>
-            ))}
+            );
+          })}
+        </nav>
+
+        {/* ユーティリティ情報 */}
+        <div className="px-4 py-3 border-t border-gray-200">
+          <div className="text-xs text-gray-500">
+            <p className="mb-1">Version 3.0.0</p>
+            <p>© 2024 Driver Logbook</p>
           </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
 

@@ -1,7 +1,11 @@
 'use client';
 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,162 +14,204 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Truck, LogOut, Settings, User } from 'lucide-react';
-import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  MenuIcon,
+  HomeIcon,
+  BookOpenIcon,
+  BarChart3Icon,
+  SettingsIcon,
+  LogOutIcon,
+  UserIcon,
+} from 'lucide-react';
 
-interface HeaderProps {
-  onMenuClick?: () => void;
-  user?: {
-    name?: string;
-    email?: string;
-    avatar?: string;
+const navigationItems = [
+  { href: '/dashboard', label: 'ダッシュボード', icon: HomeIcon },
+  { href: '/daily-reports', label: '日報管理', icon: BookOpenIcon },
+  { href: '/monthly-reports', label: '月次レポート', icon: BarChart3Icon },
+  { href: '/settings', label: '設定', icon: SettingsIcon },
+];
+
+export function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const { user, userProfile, signOut, loading } = useAuth();
+
+  // 認証が必要ないページかチェック
+  const isAuthPage =
+    pathname?.startsWith('/login') || pathname?.startsWith('/register');
+  const isHomePage = pathname === '/';
+
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = '/';
   };
-}
 
-/**
- * アプリケーションのヘッダーコンポーネント
- * ナビゲーション、ユーザーメニュー、モバイル対応を含む
- */
-export function Header({ onMenuClick, user }: HeaderProps) {
+  const getUserDisplayName = () => {
+    if (userProfile?.display_name) return userProfile.display_name;
+    if (user?.email) return user.email;
+    return 'ユーザー';
+  };
+
+  const getUserInitials = () => {
+    const name = getUserDisplayName();
+    if (name.includes('@')) {
+      // メールアドレスの場合は最初の文字
+      return name.charAt(0).toUpperCase();
+    }
+    // 日本語名の場合は最初の文字
+    return name.charAt(0);
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        {/* モバイルメニューボタン */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <div className="container mx-auto px-4">
+        <div className="flex h-14 items-center justify-between">
+          {/* ロゴ・ブランド */}
+          <div className="flex items-center space-x-4">
+            <Link
+              href={user ? '/dashboard' : '/'}
+              className="flex items-center space-x-2"
             >
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">メニューを開く</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="pr-0">
-            <MobileNav />
-          </SheetContent>
-        </Sheet>
-
-        {/* ロゴ・タイトル */}
-        <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Truck className="h-6 w-6 text-blue-600" />
-            <span className="hidden font-bold sm:inline-block">
-              Driver Logbook
-            </span>
-          </Link>
-        </div>
-
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          {/* デスクトップナビゲーション */}
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-              <Link
-                href="/dashboard"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
-              >
-                ダッシュボード
-              </Link>
-              <Link
-                href="/reports"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
-              >
-                日報
-              </Link>
-              <Link
-                href="/maintenance"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
-              >
-                メンテナンス
-              </Link>
-              <Link
-                href="/expenses"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
-              >
-                経費
-              </Link>
-            </nav>
+              <div className="h-8 w-8 rounded-md bg-blue-600 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">DL</span>
+              </div>
+              <span className="font-semibold text-lg">Driver Logbook</span>
+            </Link>
           </div>
 
-          {/* ユーザーメニュー */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={user?.avatar}
-                    alt={user?.name || 'ユーザー'}
-                  />
-                  <AvatarFallback>
-                    {user?.name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {user?.name || 'ゲストユーザー'}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email || ''}
-                  </p>
+          {/* デスクトップナビゲーション */}
+          {user && !isAuthPage && (
+            <nav className="hidden md:flex items-center space-x-6">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center space-x-2 text-sm font-medium transition-colors hover:text-blue-600 ${
+                      isActive ? 'text-blue-600' : 'text-gray-600'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
+
+          {/* 右側のアクション */}
+          <div className="flex items-center space-x-4">
+            {loading ? (
+              <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
+            ) : user && !isAuthPage ? (
+              <>
+                {/* ユーザーメニュー */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="relative h-8 w-8 rounded-full"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-blue-100 text-blue-700 text-sm font-medium">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {getUserDisplayName()}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        プロフィール
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings" className="flex items-center">
+                        <SettingsIcon className="mr-2 h-4 w-4" />
+                        設定
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      className="text-red-600"
+                    >
+                      <LogOutIcon className="mr-2 h-4 w-4" />
+                      ログアウト
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* モバイルメニュー */}
+                <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="md:hidden">
+                      <MenuIcon className="h-5 w-5" />
+                      <span className="sr-only">メニューを開く</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                    <nav className="flex flex-col space-y-4">
+                      <div className="px-3 py-2">
+                        <h2 className="mb-2 px-4 text-lg font-semibold">
+                          ナビゲーション
+                        </h2>
+                        <div className="space-y-1">
+                          {navigationItems.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = pathname === item.href;
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setIsOpen(false)}
+                                className={`flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 ${
+                                  isActive
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'text-gray-700'
+                                }`}
+                              >
+                                <Icon className="h-4 w-4" />
+                                <span>{item.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </nav>
+                  </SheetContent>
+                </Sheet>
+              </>
+            ) : (
+              !isAuthPage && (
+                <div className="flex items-center space-x-2">
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href="/login">ログイン</Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link href="/register">新規登録</Link>
+                  </Button>
                 </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/profile" className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  プロフィール
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings" className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  設定
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer">
-                <LogOut className="mr-2 h-4 w-4" />
-                ログアウト
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              )
+            )}
+          </div>
         </div>
       </div>
     </header>
-  );
-}
-
-/**
- * モバイル用ナビゲーションコンポーネント
- */
-function MobileNav() {
-  return (
-    <div className="flex flex-col space-y-2">
-      <Link href="/" className="flex items-center space-x-2 mb-4">
-        <Truck className="h-6 w-6 text-blue-600" />
-        <span className="font-bold">Driver Logbook</span>
-      </Link>
-
-      <Link href="/dashboard" className="block px-2 py-1 text-lg font-semibold">
-        ダッシュボード
-      </Link>
-      <Link href="/reports" className="block px-2 py-1 text-lg font-semibold">
-        日報
-      </Link>
-      <Link
-        href="/maintenance"
-        className="block px-2 py-1 text-lg font-semibold"
-      >
-        メンテナンス
-      </Link>
-      <Link href="/expenses" className="block px-2 py-1 text-lg font-semibold">
-        経費
-      </Link>
-    </div>
   );
 }
